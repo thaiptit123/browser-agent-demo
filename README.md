@@ -6,8 +6,9 @@ Repository này chứa mã nguồn minh họa cách sử dụng thư viện `bro
 
 ## 📌 Các file trong Repository
 
-- `scraper_agent.py`: Mã nguồn chính của Browser Agent.
+- `scraper_agent.py`: Mã nguồn chính của Browser Agent (đã tích hợp thuật toán Guardrail về giới hạn Domain và bộ lọc nội dung (Content filter)).
 - `result_quotes.csv`: File dữ liệu mẫu (10 câu nói) được Agent trích xuất thành công và xuất ra bằng Pandas.
+- `evaluation/`: Thư mục chứa Script chạy test hiệu năng (`eval_runner.py`), kết quả test (`evaluation_results.csv`), và mã nguồn HTML giả lập để thử nghiệm tính năng tự phục hồi.
 
 ## ⚙️ Yêu cầu hệ thống
 
@@ -39,4 +40,4 @@ Agent sẽ tự động:
 5. Lưu kết quả ra file `result_quotes.csv`.
 
 ## 🛡 Cân nhắc An toàn (Guardrails)
-Mã nguồn này được thiết lập giới hạn vòng lặp tối đa `max_steps=20` để phòng trường hợp LLM bị "ảo giác" (hallucination) dẫn đến lặp vô hạn. Tuyệt đối tuân thủ `robots.txt` và không dùng script này để vượt qua các cơ chế Anti-Bot tự động.
+Mã nguồn này được thiết lập giới hạn vòng lặp tối đa `max_steps=20` để phòng trường hợp LLM bị "ảo giác" (hallucination) dẫn đến lặp vô hạn. Về việc thu thập dữ liệu, trang `quotes.toscrape.com` trả về mã 404 cho `robots.txt` vì đây là một Web Scraping Sandbox được thiết kế riêng để thực hành scraping, do đó việc tự động thu thập là hợp lệ. Trong code, agent cũng đã bị khóa hoàn toàn trong domain này.

@@ -61,10 +61,25 @@ async def main():
         # Đảm bảo chỉ lấy 10 bản ghi và chuẩn hóa tags thành chuỗi cách bằng dấu phẩy
         quotes_list = quotes_list[:10]
         
+        # [GUARDRAIL Kỹ thuật 1]: Kiểm tra Domain Lock
+        # Đảm bảo Agent không đi lạc ra ngoài quotes.toscrape.com
+        visited_urls = history.urls() if hasattr(history, 'urls') else []
+        if any("quotes.toscrape.com" not in url for url in visited_urls):
+            print("🚨 CẢNH BÁO: Agent đã truy cập ngoài domain cho phép! Hủy kết quả.")
+            return
+            
+        # [GUARDRAIL Kỹ thuật 2]: Phòng chống Prompt Injection / Nội dung độc hại
+        bad_words = ["ignore previous", "password", "hack", "system prompt"]
+        
         df_data = []
         for item in quotes_list:
             # item đang là Pydantic model Quote
             item_dict = item.model_dump()
+            
+            # Content Filter check
+            if any(bad_word in item_dict["text"].lower() for bad_word in bad_words):
+                print(f"⚠️ Phát hiện nội dung đáng ngờ, loại bỏ record: {item_dict['text'][:30]}...")
+                continue
             
             # tags đã được validate là list[str], giờ ta nối thành chuỗi
             item_dict["tags"] = ", ".join(item_dict["tags"])
