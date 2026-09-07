@@ -8,20 +8,30 @@ from browser_use import Agent, ChatOllama
 class Quote(BaseModel):
     text: str = Field(description="Nội dung câu nói")
     author: str = Field(description="Tên tác giả")
-    tags: str = Field(description="Danh sách các thẻ (tags) tương ứng, nối nhau bằng dấu phẩy")
+    tags: list[str] = Field(description="Danh sách các thẻ (tags) tương ứng")
 
 class QuotesData(BaseModel):
     quotes: List[Quote] = Field(description="Danh sách tối đa 10 câu nói đầu tiên tìm thấy trên trang")
 
 async def main():
     # 2. Khởi tạo LLM. Sử dụng ChatOllama tích hợp sẵn của browser-use
-    llm = ChatOllama(model="qwen2.5:7b", temperature=0.0)
+    llm = ChatOllama(
+        model="qwen2.5:7b", 
+        ollama_options={"temperature": 0.0}
+    )
 
-    # 3. Khai báo Task chi tiết
+    # 3. Khai báo Task chi tiết với Guardrails nghiêm ngặt
     task_prompt = """
     1. Truy cập vào trang web: https://quotes.toscrape.com/
     2. Tìm danh sách các câu nói (quotes) đang được hiển thị trên trang này.
     3. Trích xuất thông tin của TỐI ĐA 10 câu nói đầu tiên.
+    
+    [GUARDRAILS BẮT BUỘC]:
+    - Tuyệt đối chỉ đọc và trích xuất dữ liệu.
+    - KHÔNG click vào bất kỳ liên kết (link) nào để chuyển trang.
+    - KHÔNG đăng nhập, KHÔNG gửi form (submit).
+    - KHÔNG tải file.
+    - KHÔNG rời khỏi domain quotes.toscrape.com.
     """
 
     # 4. Khởi tạo Agent với output_model_schema (Pydantic Model)
@@ -56,9 +66,8 @@ async def main():
             # item đang là Pydantic model Quote
             item_dict = item.model_dump()
             
-            # Đề phòng LLM vẫn trả list dù đã yêu cầu chuỗi nối bằng dấu phẩy
-            if isinstance(item_dict["tags"], list):
-                item_dict["tags"] = ", ".join(item_dict["tags"])
+            # tags đã được validate là list[str], giờ ta nối thành chuỗi
+            item_dict["tags"] = ", ".join(item_dict["tags"])
                 
             df_data.append(item_dict)
                 
