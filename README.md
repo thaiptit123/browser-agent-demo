@@ -39,11 +39,11 @@ Agent sẽ tự động:
 4. Trích xuất đúng 10 bản ghi đầu tiên với đầy đủ các trường `text`, `author`, `tags` theo chuẩn schema của Pydantic.
 5. Lưu kết quả ra file `result_quotes.csv`.
 
-Chạy kịch bản đánh giá hiệu năng (Evaluation):
+### Chạy đánh giá 10 lần
 ```bash
 python evaluation/eval_runner.py
 ```
-Script này sẽ chạy Agent lặp lại 10 lượt, thống kê tỷ lệ thành công, thời gian chạy và lưu báo cáo vào `evaluation/evaluation_results.csv`.
+Script sẽ chạy Agent 10 lần và lưu kết quả vào: `evaluation/evaluation_results.csv`.
 
 Chạy thử bài test tự phục hồi (Resilience Test):
 ```bash

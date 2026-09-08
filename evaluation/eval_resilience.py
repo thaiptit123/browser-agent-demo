@@ -39,19 +39,19 @@ async def run_resilience_test():
             structured_data = history.structured_output
             
             if structured_data and len(structured_data.quotes) == 10:
-                print("✅ Thành công! Trích xuất đủ 10 records.")
+                print("✅ Thành công! Trích xuất đủ 10/10 records.")
                 results_data.append({
                     "case": case["name"],
                     "result": "Success",
                     "records_extracted": 10
                 })
             else:
-                extracted = len(structured_data.quotes) if structured_data else 0
-                print(f"❌ Thất bại: Chỉ trích xuất được {extracted} records.")
+                actual = len(structured_data.quotes) if structured_data else 0
+                print(f"❌ Thất bại: Chỉ trích xuất {actual}/10 records.")
                 results_data.append({
                     "case": case["name"],
                     "result": "Failed",
-                    "records_extracted": extracted
+                    "records_extracted": actual
                 })
         except Exception as e:
             print(f"❌ Lỗi thực thi: {e}")
