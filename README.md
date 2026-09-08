@@ -6,7 +6,7 @@ Repository này chứa mã nguồn minh họa cách sử dụng thư viện `bro
 
 ## 📌 Các file trong Repository
 
-- `scraper_agent.py`: Mã nguồn chính của Browser Agent (đã tích hợp thuật toán Guardrail về giới hạn Domain bằng BrowserConfig và bộ lọc nội dung (Content filter)).
+- `scraper_agent.py`: Mã nguồn chính của Browser Agent (đã tích hợp thuật toán Guardrail về giới hạn Domain bằng Browser và bộ lọc nội dung (Content filter)).
 - `result_quotes.csv`: File dữ liệu mẫu (10 câu nói) được Agent trích xuất thành công và xuất ra bằng Pandas.
 - `evaluation/`: Thư mục chứa Script chạy test hiệu năng (`eval_runner.py`), script kiểm thử tính năng tự phục hồi (`eval_resilience.py`), kết quả test (`evaluation_results.csv`), và mã nguồn HTML giả lập để thử nghiệm.
 
