@@ -3,6 +3,7 @@ import pandas as pd
 from typing import List
 from pydantic import BaseModel, Field
 from browser_use import Agent, ChatOllama
+from browser_use.browser.browser import Browser, BrowserConfig
 
 # 1. Định nghĩa cấu trúc dữ liệu đầu ra bằng Pydantic (Structured Output)
 class Quote(BaseModel):
@@ -34,12 +35,20 @@ async def main():
     - KHÔNG rời khỏi domain quotes.toscrape.com.
     """
 
-    # 4. Khởi tạo Agent với output_model_schema (Pydantic Model)
+    # 4. Cấu hình Browser với Guardrail Kỹ thuật 1: Tiền kiểm Domain Lock
+    browser = Browser(
+        config=BrowserConfig(
+            allowed_domains=["quotes.toscrape.com"]
+        )
+    )
+
+    # 5. Khởi tạo Agent với output_model_schema (Pydantic Model)
     print("🚀 Đang khởi tạo Browser Agent...")
     agent = Agent(
         task=task_prompt,
         llm=llm,
-        output_model_schema=QuotesData
+        output_model_schema=QuotesData,
+        browser=browser
     )
 
     # 5. Thực thi Agent
@@ -61,13 +70,6 @@ async def main():
         # Đảm bảo chỉ lấy 10 bản ghi và chuẩn hóa tags thành chuỗi cách bằng dấu phẩy
         quotes_list = quotes_list[:10]
         
-        # [GUARDRAIL Kỹ thuật 1]: Kiểm tra Domain Lock
-        # Đảm bảo Agent không đi lạc ra ngoài quotes.toscrape.com
-        visited_urls = history.urls() if hasattr(history, 'urls') else []
-        if any("quotes.toscrape.com" not in url for url in visited_urls):
-            print("🚨 CẢNH BÁO: Agent đã truy cập ngoài domain cho phép! Hủy kết quả.")
-            return
-            
         # [GUARDRAIL Kỹ thuật 2]: Phòng chống Prompt Injection / Nội dung độc hại
         bad_words = ["ignore previous", "password", "hack", "system prompt"]
         
