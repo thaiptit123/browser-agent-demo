@@ -30,7 +30,7 @@ async def run_evaluation():
         start_time = datetime.now()
         
         try:
-            history = await agent.run(max_steps=20)
+            history = await agent.run(max_steps=8)
             end_time = datetime.now()
             duration = (end_time - start_time).total_seconds()
             

@@ -2,10 +2,10 @@ Run,Status,Records,All_3_Fields_Present,Steps,Time_Seconds,Error
 1,Success,10,True,4,21.8,
 2,Success,10,True,3,20.9,
 3,Success,10,True,4,22.1,
-4,Failed,0,False,0,0.0,"Multimodal data provided, but model does not support multimodal requests."
+4,Failed,0,False,0,0,Multimodal data provided but model does not support multimodal requests.
 5,Success,10,True,5,25.3,
 6,Success,10,True,3,19.5,
 7,Success,10,True,3,20.2,
-8,Failed,0,False,0,0.0,"Multimodal data provided, but model does not support multimodal requests."
+8,Failed,0,False,0,0,Multimodal data provided but model does not support multimodal requests.
 9,Success,10,True,4,23.0,
 10,Success,10,True,4,21.5,
