@@ -1,5 +1,6 @@
 import asyncio
 import os
+import pandas as pd
 from pydantic import BaseModel, Field
 from typing import List
 from browser_use import Agent, ChatOllama
@@ -26,6 +27,7 @@ async def run_resilience_test():
     ]
     
     print("=== BẮT ĐẦU RESILIENCE TEST ===")
+    results_data = []
     
     for case in test_cases:
         print(f"\n[Test Case]: {case['name']}")
@@ -36,12 +38,34 @@ async def run_resilience_test():
             history = await agent.run(max_steps=10)
             structured_data = history.structured_output
             
-            if structured_data and len(structured_data.quotes) > 0:
-                print(f"✅ Thành công! Trích xuất được {len(structured_data.quotes)} records.")
+            if structured_data and len(structured_data.quotes) == 10:
+                print("✅ Thành công! Trích xuất đủ 10 records.")
+                results_data.append({
+                    "case": case["name"],
+                    "result": "Success",
+                    "records_extracted": 10
+                })
             else:
-                print("❌ Thất bại: Không tìm thấy dữ liệu.")
+                extracted = len(structured_data.quotes) if structured_data else 0
+                print(f"❌ Thất bại: Chỉ trích xuất được {extracted} records.")
+                results_data.append({
+                    "case": case["name"],
+                    "result": "Failed",
+                    "records_extracted": extracted
+                })
         except Exception as e:
             print(f"❌ Lỗi thực thi: {e}")
+            results_data.append({
+                "case": case["name"],
+                "result": "Error",
+                "records_extracted": 0
+            })
+            
+    # Xuất kết quả ra CSV
+    df = pd.DataFrame(results_data)
+    csv_path = os.path.join(current_dir, "resilience_results.csv")
+    df.to_csv(csv_path, index=False)
+    print(f"\n Đã lưu báo cáo vào {csv_path}")
 
 if __name__ == "__main__":
     asyncio.run(run_resilience_test())

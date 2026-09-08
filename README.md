@@ -39,11 +39,17 @@ Agent sẽ tự động:
 4. Trích xuất đúng 10 bản ghi đầu tiên với đầy đủ các trường `text`, `author`, `tags` theo chuẩn schema của Pydantic.
 5. Lưu kết quả ra file `result_quotes.csv`.
 
+Chạy kịch bản đánh giá hiệu năng (Evaluation):
+```bash
+python evaluation/eval_runner.py
+```
+Script này sẽ chạy Agent lặp lại 10 lượt, thống kê tỷ lệ thành công, thời gian chạy và lưu báo cáo vào `evaluation/evaluation_results.csv`.
+
 Chạy thử bài test tự phục hồi (Resilience Test):
 ```bash
 python evaluation/eval_resilience.py
 ```
-Script này sẽ chạy Agent trên 2 file HTML local (trước và sau khi đổi CSS/cấu trúc HTML) để chứng minh khả năng tự phục hồi (lấy đủ 10 records) của Agent mà không cần chỉnh sửa code.
+Script này sẽ chạy Agent trên 2 file HTML local (trước và sau khi đổi CSS/cấu trúc HTML) để chứng minh khả năng tự phục hồi, và lưu báo cáo vào `evaluation/resilience_results.csv`.
 
 ## 🛡 Cân nhắc An toàn (Guardrails)
 Mã nguồn này được thiết lập giới hạn vòng lặp tối đa `max_steps=20` để phòng trường hợp LLM bị "ảo giác" (hallucination) dẫn đến lặp vô hạn. Về việc thu thập dữ liệu, trang `quotes.toscrape.com` trả về mã 404 cho `robots.txt` vì đây là một Web Scraping Sandbox được thiết kế riêng để thực hành scraping, do đó rủi ro pháp lý/đạo đức ở mức thấp. Tuy nhiên, lập trình viên vẫn cần tuân thủ các quy chuẩn đạo đức chung (không vượt quá giới hạn hoặc quá tải máy chủ). Trong code, agent cũng đã bị khóa hoàn toàn trong domain này.
