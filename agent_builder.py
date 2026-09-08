@@ -12,6 +12,8 @@ class QuotesData(BaseModel):
 
 import urllib.parse
 
+MAX_STEPS = 20
+
 def build_agent(target_url: str) -> Agent:
     parsed_url = urllib.parse.urlparse(target_url)
     domain = parsed_url.hostname if parsed_url.hostname else "localhost"

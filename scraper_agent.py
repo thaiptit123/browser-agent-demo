@@ -1,6 +1,6 @@
 import asyncio
 import pandas as pd
-from agent_builder import build_agent
+from agent_builder import build_agent, MAX_STEPS
 
 async def main():
     print("🚀 Đang khởi tạo Browser Agent...")
@@ -8,7 +8,7 @@ async def main():
 
     # 5. Thực thi Agent
     print("⏳ Agent bắt đầu duyệt web và suy luận. Vui lòng chờ (có thể mất 1-2 phút)...")
-    history = await agent.run(max_steps=20)
+    history = await agent.run(max_steps=MAX_STEPS)
 
     # 6. Phân tích kết quả từ structured_output và xuất ra CSV
     print("✅ Agent đã hoàn thành tác vụ. Đang xử lý kết quả...")

@@ -6,7 +6,7 @@ Repository này chứa mã nguồn minh họa cách sử dụng thư viện `bro
 
 ## 📌 Các file trong Repository
 
-- `agent_builder.py`: Module chứa cấu hình dùng chung (model, limits, allowed_domains, anti prompt-injection) để build agent cho các script khác.
+- `agent_builder.py`: Module chứa cấu hình dùng chung (model, limits, allowed_domains, task guardrails) để build agent cho các script khác.
 - `scraper_agent.py`: Mã nguồn chính của Browser Agent.
 - `result_quotes.csv`: File dữ liệu mẫu (10 câu nói) được Agent trích xuất thành công và xuất ra bằng Pandas.
 - `evaluation/`: Thư mục chứa Script chạy test hiệu năng (`eval_runner.py`), script kiểm thử tính năng tự phục hồi (`eval_resilience.py`), kết quả test (`evaluation_results.csv`), và mã nguồn HTML giả lập để thử nghiệm.
@@ -18,7 +18,7 @@ Repository này chứa mã nguồn minh họa cách sử dụng thư viện `bro
 1. **Python 3.11+**
 2. Cài đặt các thư viện Python:
    ```bash
-   pip install browser-use==0.13.10 playwright pandas pydantic
+   pip install browser-use==0.13.8 playwright pandas pydantic
    playwright install
    ```
 3. **Ollama**: Cài đặt [Ollama](https://ollama.com/) và tải model `qwen2.5:7b` (hoặc các model khác tùy cấu hình).
@@ -39,6 +39,10 @@ Agent sẽ tự động:
 3. Nhìn và phân tích cấu trúc của trang web.
 4. Trích xuất đúng 10 bản ghi đầu tiên với đầy đủ các trường `text`, `author`, `tags` theo chuẩn schema của Pydantic.
 5. Lưu kết quả ra file `result_quotes.csv`.
+
+*Ảnh chụp Terminal thực tế trong quá trình chạy (xem `assets/terminal_1.png` và `assets/terminal_2.png`)*
+![Terminal Screenshot 1](assets/terminal_1.png)
+![Terminal Screenshot 2](assets/terminal_2.png)
 
 ### Chạy đánh giá 10 lần
 ```bash

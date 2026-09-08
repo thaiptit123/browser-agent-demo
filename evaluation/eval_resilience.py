@@ -8,7 +8,7 @@ import pandas as pd
 import time
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from agent_builder import build_agent
+from agent_builder import build_agent, MAX_STEPS
 
 def start_server(directory, port):
     class Handler(http.server.SimpleHTTPRequestHandler):
@@ -43,6 +43,20 @@ async def run_resilience_test():
         {"name": "After (class='.item' + dummy div)", "url": after_url}
     ]
     
+    # Ground truth từ trang web (10 quotes đầu tiên)
+    ground_truth = [
+        {"author": "Albert Einstein", "text_start": "The world as we have created it"},
+        {"author": "J.K. Rowling", "text_start": "It is our choices, Harry"},
+        {"author": "Albert Einstein", "text_start": "There are only two ways to live your life"},
+        {"author": "Jane Austen", "text_start": "The person, be it gentleman or lady"},
+        {"author": "Marilyn Monroe", "text_start": "Imperfection is beauty, madness is genius"},
+        {"author": "Albert Einstein", "text_start": "Try not to become a man of success"},
+        {"author": "André Gide", "text_start": "It is better to be hated for what you are"},
+        {"author": "Thomas A. Edison", "text_start": "I have not failed. I've just found 10,000 ways"},
+        {"author": "Eleanor Roosevelt", "text_start": "A woman is like a tea bag"},
+        {"author": "Steve Martin", "text_start": "A day without sunshine is like, you know, night"}
+    ]
+    
     print("=== BẮT ĐẦU RESILIENCE TEST ===")
     results_data = []
     
@@ -51,14 +65,10 @@ async def run_resilience_test():
         
         agent = build_agent(case['url'])
         try:
-            history = await agent.run(max_steps=10)
+            history = await agent.run(max_steps=MAX_STEPS)
             structured_data = history.structured_output
             
             if structured_data and len(structured_data.quotes) == 10:
-                ground_truth = []
-                for k in range(1, 11):
-                    ground_truth.append({"author": f"Author {k}", "text_start": f"Quote {k}"})
-                
                 match_count = 0
                 for j in range(10):
                     quote = structured_data.quotes[j]

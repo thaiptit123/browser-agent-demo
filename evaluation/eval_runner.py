@@ -2,10 +2,11 @@ import asyncio
 import os
 import json
 import pandas as pd
+import time
 from datetime import datetime
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from agent_builder import build_agent
+from agent_builder import build_agent, MAX_STEPS
 
 async def run_evaluation():
     results = []
@@ -32,7 +33,7 @@ async def run_evaluation():
         start_time = datetime.now()
         
         try:
-            history = await agent.run(max_steps=8)
+            history = await agent.run(max_steps=MAX_STEPS)
             end_time = datetime.now()
             duration = (end_time - start_time).total_seconds()
             
