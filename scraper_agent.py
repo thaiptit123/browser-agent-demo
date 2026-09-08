@@ -2,8 +2,7 @@ import asyncio
 import pandas as pd
 from typing import List
 from pydantic import BaseModel, Field
-from browser_use import Agent, ChatOllama
-from browser_use.browser.browser import Browser, BrowserConfig
+from browser_use import Agent, ChatOllama, Browser
 
 # 1. Định nghĩa cấu trúc dữ liệu đầu ra bằng Pydantic (Structured Output)
 class Quote(BaseModel):
@@ -37,9 +36,7 @@ async def main():
 
     # 4. Cấu hình Browser với Guardrail Kỹ thuật 1: Tiền kiểm Domain Lock
     browser = Browser(
-        config=BrowserConfig(
-            allowed_domains=["quotes.toscrape.com"]
-        )
+        allowed_domains=["quotes.toscrape.com"]
     )
 
     # 5. Khởi tạo Agent với output_model_schema (Pydantic Model)
