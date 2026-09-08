@@ -55,12 +55,30 @@ async def run_resilience_test():
             structured_data = history.structured_output
             
             if structured_data and len(structured_data.quotes) == 10:
-                print("✅ Thành công! Trích xuất đủ 10/10 records.")
-                results_data.append({
-                    "case": case["name"],
-                    "result": "Success",
-                    "records_extracted": 10
-                })
+                ground_truth = []
+                for k in range(1, 11):
+                    ground_truth.append({"author": f"Author {k}", "text_start": f"Quote {k}"})
+                
+                match_count = 0
+                for j in range(10):
+                    quote = structured_data.quotes[j]
+                    if quote.author == ground_truth[j]["author"] and ground_truth[j]["text_start"] in quote.text:
+                        match_count += 1
+                
+                if match_count == 10:
+                    print("✅ Thành công! Trích xuất đủ và đúng 10/10 records.")
+                    results_data.append({
+                        "case": case["name"],
+                        "result": "Success",
+                        "records_extracted": 10
+                    })
+                else:
+                    print(f"❌ Thất bại: Trích xuất 10 records nhưng sai Ground Truth (Matched {match_count}/10).")
+                    results_data.append({
+                        "case": case["name"],
+                        "result": f"Failed (GT mismatch {match_count}/10)",
+                        "records_extracted": 10
+                    })
             else:
                 actual = len(structured_data.quotes) if structured_data else 0
                 print(f"❌ Thất bại: Chỉ trích xuất {actual}/10 records.")

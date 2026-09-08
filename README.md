@@ -6,7 +6,8 @@ Repository này chứa mã nguồn minh họa cách sử dụng thư viện `bro
 
 ## 📌 Các file trong Repository
 
-- `scraper_agent.py`: Mã nguồn chính của Browser Agent (đã tích hợp thuật toán Guardrail về giới hạn Domain bằng Browser và bộ lọc nội dung (Content filter)).
+- `agent_builder.py`: Module chứa cấu hình dùng chung (model, limits, allowed_domains, anti prompt-injection) để build agent cho các script khác.
+- `scraper_agent.py`: Mã nguồn chính của Browser Agent.
 - `result_quotes.csv`: File dữ liệu mẫu (10 câu nói) được Agent trích xuất thành công và xuất ra bằng Pandas.
 - `evaluation/`: Thư mục chứa Script chạy test hiệu năng (`eval_runner.py`), script kiểm thử tính năng tự phục hồi (`eval_resilience.py`), kết quả test (`evaluation_results.csv`), và mã nguồn HTML giả lập để thử nghiệm.
 
@@ -17,7 +18,7 @@ Repository này chứa mã nguồn minh họa cách sử dụng thư viện `bro
 1. **Python 3.11+**
 2. Cài đặt các thư viện Python:
    ```bash
-   pip install browser-use==0.13.8 playwright pandas pydantic
+   pip install browser-use==0.13.10 playwright pandas pydantic
    playwright install
    ```
 3. **Ollama**: Cài đặt [Ollama](https://ollama.com/) và tải model `qwen2.5:7b` (hoặc các model khác tùy cấu hình).

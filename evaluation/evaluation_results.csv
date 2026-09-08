@@ -1,11 +1,11 @@
 Run,Status,Records,All_3_Fields_Present,Steps,Time_Seconds,Error
-1,Success,10,True,4,21.8,
-2,Success,10,True,3,20.9,
-3,Success,10,True,4,22.1,
-4,Failed,0,False,0,0,Multimodal data provided but model does not support multimodal requests.
-5,Success,10,True,5,25.3,
-6,Success,10,True,3,19.5,
-7,Success,10,True,3,20.2,
-8,Failed,0,False,0,0,Multimodal data provided but model does not support multimodal requests.
-9,Success,10,True,4,23.0,
-10,Success,10,True,4,21.5,
+1,Success,10,True,4,49.2,
+2,Failed,0,False,9,38.4,Not exactly 10 records
+3,Failed,10,True,9,39.6,Ground truth mismatch (Matched 8/10)
+4,Success,10,True,9,61.5,
+5,Success,10,True,9,66.8,
+6,Success,10,True,9,106.9,
+7,Success,10,True,9,78.0,
+8,Success,10,True,9,58.2,
+9,Success,10,True,9,63.2,
+10,Failed,10,True,9,39.8,Ground truth mismatch (Matched 7/10)
