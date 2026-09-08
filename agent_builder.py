@@ -10,7 +10,12 @@ class Quote(BaseModel):
 class QuotesData(BaseModel):
     quotes: List[Quote] = Field(description="Danh sách tối đa 10 câu nói đầu tiên tìm thấy trên trang")
 
+import urllib.parse
+
 def build_agent(target_url: str) -> Agent:
+    parsed_url = urllib.parse.urlparse(target_url)
+    domain = parsed_url.hostname if parsed_url.hostname else "localhost"
+    
     llm = ChatOllama(
         model="qwen2.5:7b",
         ollama_options={"temperature": 0.0}
@@ -31,7 +36,7 @@ def build_agent(target_url: str) -> Agent:
     """
 
     browser = Browser(
-        allowed_domains=["quotes.toscrape.com", "localhost", "127.0.0.1"]
+        allowed_domains=[domain]
     )
 
     agent = Agent(
