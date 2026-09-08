@@ -1,61 +1,71 @@
 import asyncio
 import time
+import os
+import sys
 import pandas as pd
 from pydantic import BaseModel, Field
 from typing import List
-from browser_use import Agent, ChatOllama
 
-class Quote(BaseModel):
-    text: str
-    author: str
-    tags: list[str]
-
-class QuotesData(BaseModel):
-    quotes: List[Quote]
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from agent_builder import build_agent
 
 async def run_evaluation():
-    llm = ChatOllama(model="qwen2.5:7b", ollama_options={"temperature": 0.0})
-    task_prompt = "Trích xuất 10 câu nói đầu tiên từ https://quotes.toscrape.com/"
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    logs_dir = os.path.join(current_dir, "logs")
+    os.makedirs(logs_dir, exist_ok=True)
     
     results = []
     
     for i in range(1, 11):
         print(f"--- Running iteration {i}/10 ---")
         start_time = time.time()
-        agent = Agent(task=task_prompt, llm=llm, output_model_schema=QuotesData)
+        agent = build_agent("https://quotes.toscrape.com/")
         
         try:
             history = await agent.run(max_steps=20)
             elapsed = round(time.time() - start_time, 1)
+            steps_taken = len(history.history)
+            
+            # Save raw log
+            log_file = os.path.join(logs_dir, f"run_{i}.json")
+            with open(log_file, "w", encoding="utf-8") as f:
+                f.write(history.model_dump_json())
             
             structured_data = history.structured_output
-            if structured_data and len(structured_data.quotes) > 0:
+            if structured_data and len(structured_data.quotes) == 10:
                 results.append({
                     "run_id": i,
                     "result": "Success",
-                    "records_extracted": len(structured_data.quotes),
+                    "records_extracted": 10,
                     "all_fields_present": True,
-                    "steps": len(history.history),
+                    "steps": steps_taken,
                     "time_seconds": elapsed,
+                    "error": "",
                     "model": "qwen2.5:7b"
                 })
             else:
-                raise ValueError("No data extracted")
+                extracted = len(structured_data.quotes) if structured_data else 0
+                raise ValueError(f"Extracted only {extracted} records")
         except Exception as e:
             print(f"Run {i} failed: {e}")
+            elapsed = round(time.time() - start_time, 1)
+            # steps_taken depends on if history was created, fallback to 0 if not
+            steps_taken = len(history.history) if 'history' in locals() and history else 0
             results.append({
                 "run_id": i,
                 "result": "Failed",
                 "records_extracted": 0,
                 "all_fields_present": False,
-                "steps": 0,
-                "time_seconds": 0,
+                "steps": steps_taken,
+                "time_seconds": elapsed,
+                "error": str(e),
                 "model": "qwen2.5:7b"
             })
             
     df = pd.DataFrame(results)
-    df.to_csv("evaluation_results.csv", index=False)
-    print("Evaluation complete. Results saved to evaluation_results.csv")
+    output_path = os.path.join(current_dir, "evaluation_results.csv")
+    df.to_csv(output_path, index=False)
+    print(f"Evaluation complete. Results saved to {output_path}")
 
 if __name__ == "__main__":
     asyncio.run(run_evaluation())

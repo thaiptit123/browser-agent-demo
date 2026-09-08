@@ -1,25 +1,42 @@
 import asyncio
 import os
+import sys
+import threading
+import http.server
+import socketserver
 import pandas as pd
-from pydantic import BaseModel, Field
-from typing import List
-from browser_use import Agent, ChatOllama
+import time
 
-class Quote(BaseModel):
-    text: str
-    author: str
-    tags: list[str]
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from agent_builder import build_agent
 
-class QuotesData(BaseModel):
-    quotes: List[Quote]
+def start_server(directory, port):
+    class Handler(http.server.SimpleHTTPRequestHandler):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, directory=directory, **kwargs)
+        def log_message(self, format, *args):
+            pass # Disable logging
+
+    httpd = socketserver.TCPServer(("", port), Handler)
+    thread = threading.Thread(target=httpd.serve_forever)
+    thread.daemon = True
+    thread.start()
+    return httpd
 
 async def run_resilience_test():
-    llm = ChatOllama(model="qwen2.5:7b", ollama_options={"temperature": 0.0})
-    
-    # Lấy đường dẫn tuyệt đối của thư mục fixtures
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    before_url = f"file://{os.path.join(current_dir, 'fixtures', 'quotes_before.html')}"
-    after_url = f"file://{os.path.join(current_dir, 'fixtures', 'quotes_after.html')}"
+    fixtures_dir = os.path.join(current_dir, 'fixtures')
+    
+    # Khởi tạo HTTP server phục vụ thư mục fixtures
+    port = 8000
+    print(f"Khởi động HTTP server tại http://localhost:{port}/")
+    httpd = start_server(fixtures_dir, port)
+    
+    # Đợi server khởi động
+    time.sleep(1)
+    
+    before_url = f"http://localhost:{port}/quotes_before.html"
+    after_url = f"http://localhost:{port}/quotes_after.html"
     
     test_cases = [
         {"name": "Before (class='.quote')", "url": before_url},
@@ -31,9 +48,8 @@ async def run_resilience_test():
     
     for case in test_cases:
         print(f"\n[Test Case]: {case['name']}")
-        task_prompt = f"Mở trang web {case['url']} và trích xuất danh sách tất cả các câu nói (quotes) hiện có."
         
-        agent = Agent(task=task_prompt, llm=llm, output_model_schema=QuotesData)
+        agent = build_agent(case['url'])
         try:
             history = await agent.run(max_steps=10)
             structured_data = history.structured_output
@@ -66,6 +82,9 @@ async def run_resilience_test():
     csv_path = os.path.join(current_dir, "resilience_results.csv")
     df.to_csv(csv_path, index=False)
     print(f"\n Đã lưu báo cáo vào {csv_path}")
+    
+    # Tắt HTTP server
+    httpd.shutdown()
 
 if __name__ == "__main__":
     asyncio.run(run_resilience_test())

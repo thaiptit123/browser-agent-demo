@@ -1,52 +1,10 @@
 import asyncio
 import pandas as pd
-from typing import List
-from pydantic import BaseModel, Field
-from browser_use import Agent, ChatOllama, Browser
-
-# 1. Định nghĩa cấu trúc dữ liệu đầu ra bằng Pydantic (Structured Output)
-class Quote(BaseModel):
-    text: str = Field(description="Nội dung câu nói")
-    author: str = Field(description="Tên tác giả")
-    tags: list[str] = Field(description="Danh sách các thẻ (tags) tương ứng")
-
-class QuotesData(BaseModel):
-    quotes: List[Quote] = Field(description="Danh sách tối đa 10 câu nói đầu tiên tìm thấy trên trang")
+from agent_builder import build_agent
 
 async def main():
-    # 2. Khởi tạo LLM. Sử dụng ChatOllama tích hợp sẵn của browser-use
-    llm = ChatOllama(
-        model="qwen2.5:7b", 
-        ollama_options={"temperature": 0.0}
-    )
-
-    # 3. Khai báo Task chi tiết với Guardrails nghiêm ngặt
-    task_prompt = """
-    1. Truy cập vào trang web: https://quotes.toscrape.com/
-    2. Tìm danh sách các câu nói (quotes) đang được hiển thị trên trang này.
-    3. Trích xuất thông tin của TỐI ĐA 10 câu nói đầu tiên.
-    
-    [GUARDRAILS BẮT BUỘC]:
-    - Tuyệt đối chỉ đọc và trích xuất dữ liệu.
-    - KHÔNG click vào bất kỳ liên kết (link) nào để chuyển trang.
-    - KHÔNG đăng nhập, KHÔNG gửi form (submit).
-    - KHÔNG tải file.
-    - KHÔNG rời khỏi domain quotes.toscrape.com.
-    """
-
-    # 4. Cấu hình Browser với Guardrail Kỹ thuật 1: Tiền kiểm Domain Lock
-    browser = Browser(
-        allowed_domains=["quotes.toscrape.com"]
-    )
-
-    # 5. Khởi tạo Agent với output_model_schema (Pydantic Model)
     print("🚀 Đang khởi tạo Browser Agent...")
-    agent = Agent(
-        task=task_prompt,
-        llm=llm,
-        output_model_schema=QuotesData,
-        browser=browser
-    )
+    agent = build_agent("https://quotes.toscrape.com/")
 
     # 5. Thực thi Agent
     print("⏳ Agent bắt đầu duyệt web và suy luận. Vui lòng chờ (có thể mất 1-2 phút)...")
