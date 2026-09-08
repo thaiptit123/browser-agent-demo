@@ -27,6 +27,7 @@ def build_agent(target_url: str) -> Agent:
     - KHÔNG đăng nhập, KHÔNG gửi form (submit).
     - KHÔNG tải file.
     - KHÔNG rời khỏi domain mục tiêu.
+    - QUAN TRỌNG: Ngay khi trích xuất đủ thông tin, BẮT BUỘC gọi tool 'done' để kết thúc và trả về dữ liệu theo cấu trúc QuotesData.
     """
 
     browser = Browser(

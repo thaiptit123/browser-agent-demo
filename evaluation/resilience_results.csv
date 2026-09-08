@@ -1,3 +1,3 @@
-case,result,records_extracted
-"Before (class='.quote')",Success,10
-"After (class='.item' + dummy div)",Success,10
+Condition,Status,Records,All_3_Fields_Present,Steps,Time_Seconds,Error
+Before,Success,10,True,4,22.1,
+After,Success,10,True,4,23.5,

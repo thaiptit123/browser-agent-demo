@@ -1,71 +1,98 @@
 import asyncio
-import time
 import os
-import sys
+import json
 import pandas as pd
-from pydantic import BaseModel, Field
-from typing import List
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from datetime import datetime
 from agent_builder import build_agent
 
 async def run_evaluation():
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    logs_dir = os.path.join(current_dir, "logs")
-    os.makedirs(logs_dir, exist_ok=True)
-    
     results = []
+    target_url = "https://quotes.toscrape.com/"
+    os.makedirs("evaluation/logs", exist_ok=True)
     
+    # GROUND TRUTH CHO 10 BẢN GHI ĐẦU TIÊN
+    ground_truth = [
+        {"author": "Albert Einstein", "text_start": "The world as we have created it"},
+        {"author": "J.K. Rowling", "text_start": "It is our choices, Harry"},
+        {"author": "Albert Einstein", "text_start": "There are only two ways to live your life"},
+        {"author": "Jane Austen", "text_start": "The person, be it gentleman or lady"},
+        {"author": "Marilyn Monroe", "text_start": "Imperfection is beauty, madness is genius"},
+        {"author": "Albert Einstein", "text_start": "Try not to become a man of success"},
+        {"author": "André Gide", "text_start": "It is better to be hated for what you are"},
+        {"author": "Thomas A. Edison", "text_start": "I have not failed. I've just found 10,000 ways"},
+        {"author": "Eleanor Roosevelt", "text_start": "A woman is like a tea bag"},
+        {"author": "Steve Martin", "text_start": "A day without sunshine is like, you know, night"}
+    ]
+
     for i in range(1, 11):
-        print(f"--- Running iteration {i}/10 ---")
-        start_time = time.time()
-        agent = build_agent("https://quotes.toscrape.com/")
+        print(f"\n--- RUN {i}/10 ---")
+        agent = build_agent(target_url)
+        start_time = datetime.now()
         
         try:
             history = await agent.run(max_steps=20)
-            elapsed = round(time.time() - start_time, 1)
-            steps_taken = len(history.history)
+            end_time = datetime.now()
+            duration = (end_time - start_time).total_seconds()
             
-            # Save raw log
-            log_file = os.path.join(logs_dir, f"run_{i}.json")
-            with open(log_file, "w", encoding="utf-8") as f:
+            with open(f"evaluation/logs/run_{i}.json", "w", encoding="utf-8") as f:
                 f.write(history.model_dump_json())
-            
+                
             structured_data = history.structured_output
+            
             if structured_data and len(structured_data.quotes) == 10:
-                results.append({
-                    "run_id": i,
-                    "result": "Success",
-                    "records_extracted": 10,
-                    "all_fields_present": True,
-                    "steps": steps_taken,
-                    "time_seconds": elapsed,
-                    "error": "",
-                    "model": "qwen2.5:7b"
-                })
+                # ĐỐI CHIẾU GROUND TRUTH TỪNG RECORD
+                match_count = 0
+                for j in range(10):
+                    quote = structured_data.quotes[j]
+                    if quote.author == ground_truth[j]["author"] and ground_truth[j]["text_start"] in quote.text:
+                        match_count += 1
+                
+                if match_count == 10:
+                    results.append({
+                        "Run": i,
+                        "Status": "Success",
+                        "Records": 10,
+                        "All_3_Fields_Present": True,
+                        "Steps": len(history.history),
+                        "Time_Seconds": round(duration, 1),
+                        "Error": ""
+                    })
+                else:
+                    results.append({
+                        "Run": i,
+                        "Status": "Failed",
+                        "Records": 10,
+                        "All_3_Fields_Present": True,
+                        "Steps": len(history.history),
+                        "Time_Seconds": round(duration, 1),
+                        "Error": f"Ground truth mismatch (Matched {match_count}/10)"
+                    })
             else:
-                extracted = len(structured_data.quotes) if structured_data else 0
-                raise ValueError(f"Extracted only {extracted} records")
+                records = len(structured_data.quotes) if structured_data else 0
+                results.append({
+                    "Run": i,
+                    "Status": "Failed",
+                    "Records": records,
+                    "All_3_Fields_Present": False,
+                    "Steps": len(history.history),
+                    "Time_Seconds": round(duration, 1),
+                    "Error": "Not exactly 10 records"
+                })
         except Exception as e:
-            print(f"Run {i} failed: {e}")
-            elapsed = round(time.time() - start_time, 1)
-            # steps_taken depends on if history was created, fallback to 0 if not
-            steps_taken = len(history.history) if 'history' in locals() and history else 0
+            end_time = datetime.now()
             results.append({
-                "run_id": i,
-                "result": "Failed",
-                "records_extracted": 0,
-                "all_fields_present": False,
-                "steps": steps_taken,
-                "time_seconds": elapsed,
-                "error": str(e),
-                "model": "qwen2.5:7b"
+                "Run": i,
+                "Status": "Failed",
+                "Records": 0,
+                "All_3_Fields_Present": False,
+                "Steps": 0,
+                "Time_Seconds": round((end_time - start_time).total_seconds(), 1),
+                "Error": str(e)
             })
             
     df = pd.DataFrame(results)
-    output_path = os.path.join(current_dir, "evaluation_results.csv")
-    df.to_csv(output_path, index=False)
-    print(f"Evaluation complete. Results saved to {output_path}")
+    df.to_csv("evaluation/evaluation_results.csv", index=False)
+    print("\nEvaluation hoàn tất. Kết quả được lưu tại evaluation/evaluation_results.csv")
 
 if __name__ == "__main__":
     asyncio.run(run_evaluation())
