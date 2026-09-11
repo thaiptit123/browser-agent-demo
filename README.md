@@ -54,7 +54,7 @@ Chạy thử bài test tự phục hồi (Resilience Test):
 ```bash
 python evaluation/eval_resilience.py
 ```
-Script này sẽ chạy Agent trên 2 file HTML local (trước và sau khi đổi CSS/cấu trúc HTML) để minh họa khả năng xử lý một biến thể DOM, và lưu báo cáo vào `evaluation/resilience_results.csv`.
+Script này chạy Agent trên 2 phiên bản HTML local, mỗi phiên bản 10 lượt, để đánh giá khả năng thích ứng với thay đổi cấu trúc HTML và lưu báo cáo chi tiết/tóm tắt vào `evaluation/resilience_results_raw.csv` và `evaluation/resilience_results_summary.csv`.
 
 ## 🛡 Cân nhắc An toàn (Guardrails)
 Mã nguồn này được thiết lập giới hạn vòng lặp tối đa `max_steps=20` để phòng trường hợp LLM bị "ảo giác" (hallucination) dẫn đến lặp vô hạn. Về việc thu thập dữ liệu, trang `quotes.toscrape.com` trả về mã 404 cho `robots.txt` vì đây là một Web Scraping Sandbox được thiết kế riêng để thực hành scraping, do đó rủi ro pháp lý/đạo đức ở mức thấp. Tuy nhiên, lập trình viên vẫn cần tuân thủ các quy chuẩn đạo đức chung (không vượt quá giới hạn hoặc quá tải máy chủ). Trong code, agent cũng đã bị khóa hoàn toàn trong domain này.
