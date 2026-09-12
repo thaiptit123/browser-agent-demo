@@ -58,6 +58,7 @@ async def run_evaluation():
                         "All_3_Fields_Present": True,
                         "Steps": len(history.history),
                         "Time_Seconds": round(duration, 1),
+                        "Matched_GT": 10,
                         "Error": ""
                     })
                 else:
@@ -68,6 +69,7 @@ async def run_evaluation():
                         "All_3_Fields_Present": True,
                         "Steps": len(history.history),
                         "Time_Seconds": round(duration, 1),
+                        "Matched_GT": match_count,
                         "Error": f"Ground truth mismatch (Matched {match_count}/10)"
                     })
             else:
@@ -79,6 +81,7 @@ async def run_evaluation():
                     "All_3_Fields_Present": False,
                     "Steps": len(history.history),
                     "Time_Seconds": round(duration, 1),
+                    "Matched_GT": 0,
                     "Error": "Not exactly 10 records"
                 })
         except Exception as e:
@@ -90,6 +93,7 @@ async def run_evaluation():
                 "All_3_Fields_Present": False,
                 "Steps": 0,
                 "Time_Seconds": round((end_time - start_time).total_seconds(), 1),
+                "Matched_GT": 0,
                 "Error": str(e)
             })
             
